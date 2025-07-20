@@ -1,0 +1,16 @@
+name: finance-assistant
+metadata:
+  template: finance-assistant@0.1.0
+services:
+  frontend:
+    project: ./frontend
+    language: js
+    host: appservice
+    dist: ./dist
+  backend:
+    project: ./backend
+    language: python
+    host: appservice
+infra:
+  provider: bicep
+  path: ./infra
