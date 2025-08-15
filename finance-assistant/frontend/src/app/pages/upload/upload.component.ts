@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { UploadService } from '../../services/upload.service';
 
+
 @Component({
   selector: 'app-upload',
   standalone: true,
@@ -14,9 +15,9 @@ import { UploadService } from '../../services/upload.service';
         <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()">
           <div class="form-group">
             <label for="file">Select File</label>
-            <input type="file" id="file" (change)="onFileChange($event)">
+            <input type="file" id="file" formControlName="file" (change)="onFileChange($event)">
           </div>
-          <button type="submit" [disabled]="!uploadForm.valid || !selectedFile">Upload</button>
+          <button type="submit" [disabled]="!selectedFile">Upload</button>
         </form>
         <div *ngIf="uploadStatus" class="status-message">
           {{ uploadStatus }}
@@ -47,6 +48,7 @@ export class UploadComponent {
   selectedFile: File | null = null;
   uploadStatus: string = '';
 
+
   constructor(
     private fb: FormBuilder,
     private uploadService: UploadService
@@ -56,15 +58,22 @@ export class UploadComponent {
     });
   }
 
+
   onFileChange(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length) {
       this.selectedFile = input.files[0];
+      // Update the form control value
+      this.uploadForm.patchValue({
+        file: this.selectedFile
+      });
+      this.uploadForm.get('file')?.markAsTouched();
     }
   }
 
+
   onSubmit() {
-    if (this.uploadForm.valid && this.selectedFile) {
+    if (this.selectedFile) {
       this.uploadStatus = 'Uploading...';
       this.uploadService.uploadBankStatement(this.selectedFile).subscribe({
         next: (response: any) => {

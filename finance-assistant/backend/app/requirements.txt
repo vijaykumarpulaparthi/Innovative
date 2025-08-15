@@ -1,9 +1,10 @@
 fastapi
 uvicorn
 sqlalchemy
-pymssql
+pyodbc
 pydantic
-python-jose
+email-validator
+bcrypt
 passlib
 python-multipart
 langchain
