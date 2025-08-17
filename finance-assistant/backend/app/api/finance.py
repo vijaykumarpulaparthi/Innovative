@@ -45,10 +45,14 @@ def get_transactions(
     """
     Get transactions for the current user.
     """
-    transactions = db.query(Transaction).filter(
-        Transaction.user_id == current_user.id
-    ).offset(skip).limit(limit).all()
-    return transactions
+    try:
+        transactions = db.query(Transaction).filter(
+            Transaction.user_id == current_user.id
+        ).order_by(Transaction.date.desc(), Transaction.id.desc()).offset(skip).limit(limit).all()
+        return transactions
+    except Exception as e:
+        print(f"❌ Error fetching transactions: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @router.get("/monthly-summary")

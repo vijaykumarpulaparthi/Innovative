@@ -95,64 +95,67 @@ def create_conversation_graph():
    
     def generate_response(state):
         """Generate a response using the LLM."""
-        llm = get_llm()
+        try:
+            llm = get_llm()
        
-        context = state.get("context", {})
-        current_date = datetime.now().strftime("%B %d, %Y")
+            context = state.get("context", {})
+            current_date = datetime.now().strftime("%B %d, %Y")
        
-        # Check if there are any transactions
-        has_transactions = (
-            context and
-            context.get('total_income', 0) > 0 or
-            context.get('total_expense', 0) > 0 or
-            context.get('total_investment', 0) > 0
-        )
+            # Check if there are any transactions
+            has_transactions = (
+                context and
+                context.get('total_income', 0) > 0 or
+                context.get('total_expense', 0) > 0 or
+                context.get('total_investment', 0) > 0
+            )
        
-        if has_transactions:
-            # Create system message with financial context
-            system_message = f"""
-            You are a helpful financial assistant. Today is {current_date}.
+            if has_transactions:
+                # Create system message with financial context
+                system_message = f"""
+                You are a helpful financial assistant. Today is {current_date}.
            
-            The user has the following financial information:
-            - Total Income: ${context['total_income']:.2f}
-            - Total Expenses: ${context['total_expense']:.2f}
-            - Total Investments: ${context['total_investment']:.2f}
-            - Net Savings: ${context['net_savings']:.2f}
+                The user has the following financial information:
+                - Total Income: ${context['total_income']:.2f}
+                - Total Expenses: ${context['total_expense']:.2f}
+                - Total Investments: ${context['total_investment']:.2f}
+                - Net Savings: ${context['net_savings']:.2f}
            
-            Expense Breakdown by Category:
-            {' '.join([f'- {cat}: ${amount:.2f}' for cat, amount in context['expense_by_category'].items()])}
+                Expense Breakdown by Category:
+                {' '.join([f'- {cat}: ${amount:.2f}' for cat, amount in context['expense_by_category'].items()])}
            
-            Provide helpful, concise financial advice and answer questions based on this data.
-            Be professional but friendly. Keep responses under 3 paragraphs.
-            """
-        else:
-            # Create general financial assistant system message
-            system_message = f"""
-            You are a helpful financial assistant. Today is {current_date}.
+                Provide helpful, concise financial advice and answer questions based on this data.
+                Be professional but friendly. Keep responses under 3 paragraphs.
+                """
+            else:
+                # Create general financial assistant system message
+                system_message = f"""
+                You are a helpful financial assistant. Today is {current_date}.
            
-            The user hasn't provided any transaction data yet, so provide general financial advice,
-            budgeting tips, investment guidance, or answer their financial questions directly.
+                The user hasn't provided any transaction data yet, so provide general financial advice,
+                budgeting tips, investment guidance, or answer their financial questions directly.
            
-            You can help with:
-            - Personal finance advice
-            - Budgeting strategies
-            - Investment basics
-            - Saving tips
-            - Financial planning
-            - Expense tracking guidance
+                You can help with:
+                - Personal finance advice
+                - Budgeting strategies
+                - Investment basics
+                - Saving tips
+                - Financial planning
+                - Expense tracking guidance
            
-            Be professional but friendly. Keep responses under 3 paragraphs unless the user asks for detailed information.
-            """
+                Be professional but friendly. Keep responses under 3 paragraphs unless the user asks for detailed information.
+                """
        
-        messages = [
-            SystemMessage(content=system_message),
-            HumanMessage(content=state["message"])
-        ]
+            messages = [
+                SystemMessage(content=system_message),
+                HumanMessage(content=state["message"])
+            ]
        
-        response = llm.invoke(messages)
-        state["response"] = response.content
+            response = llm.invoke(messages)
+            state["response"] = response.content
        
-        return state
+            return state
+        except Exception as e:
+            print(f"❌ Error during response generation: {e}")
    
     # Create the graph
     workflow = StateGraph(ConversationState)
